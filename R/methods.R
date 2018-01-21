@@ -1,145 +1,144 @@
 
-#' reader initializer
-#' @aliases initialize,reader-method
+#' chunker initializer
+#' @aliases initialize,chunker-method
 #' @keywords internal
 
-setMethod( "initialize", "reader", function(.Object, path_, sep_, has_colnames_,
-                                            has_rownames_, chunksize_) {
-  path_ <- normalizePath(path_)
-  .Object@pointer  <- reader__new(path_, sep_, has_colnames_, has_rownames_, chunksize_)
-  .Object
-} )
+setMethod( "initialize", "chunker", 
+           function(.Object, path_, sep_, has_colnames_, has_rownames_, 
+                    chunksize_, data_format_,  columns_classes_) {
+             
+             path_ <- normalizePath(path_)
+             
+             if(data_format_ == "matrix") {
+               .Object@pointer  <- chunker__new_matrix(path_, 
+                                                      sep_, 
+                                                      has_colnames_, 
+                                                      has_rownames_, 
+                                                      chunksize_)
+             } else {
+               .Object@pointer  <- chunker__new_data_frame(path_, sep_,
+                                                          has_colnames_, 
+                                                          has_rownames_,
+                                                          chunksize_, 
+                                                          columns_classes_)
+             }
+             .Object
+           })
 
-
-#' Manipulation methods for reader objects
-#' @name reader methods
-#' @description Reader objects can be manipulated with the following methods:
+#' Manipulation methods for chunker objects
+#' @name chunker methods
+#' @description chunker objects can be manipulated with the following methods:
 #' \enumerate{
-#' \item{\bold{next_chunk}}{: allows to read the next chunk of a reader object}
-#' \item{\bold{get_matrix}}{: retrieve the current data chunk contained in the object, as matrix}
-#' \item{\bold{get_dataframe}}{: retrieves the current data chunk, as a data frame} 
+#' \item{\bold{next_chunk}}{: allows to read the next chunk of a chunker object}
+#' \item{\bold{get_table}}{: retrieve the current data chunk contained in the object}
 #' }
 #' 
-#' In addition, this information can be retrieved from reader objects:
+#' In addition, this information can be retrieved from chunker objects:
 #' \enumerate{
 #' \item{\bold{get_completed}}{: get the number of rows already read}
-#' \item{\bold{get_colnames}}{: get column names of the reader object}
+#' \item{\bold{get_colnames}}{: get column names of the chunker object}
 #' }
 #' 
-#' @details See \code{\link{reader}} for examples.
+#' @details See \code{\link{chunker}} for examples.
 #' 
-#' @param obj object of class reader
-#' @rdname reader-methods
+#' @param obj object of class chunker
+#' @rdname chunker-methods
 NULL
 
 
 #' next_chunk
 #' @name next_chunk
 #' @description NULL
-#' @rdname reader-methods
+#' @rdname chunker-methods
 #' @export
 setGeneric("next_chunk", function(obj) standardGeneric("next_chunk"))
 
 
-#' @rdname reader-methods
-#' @aliases next_chunk,reader-methods
+#' @rdname chunker-methods
+#' @aliases next_chunk,chunker-methods
 
-setMethod("next_chunk", "reader", function(obj) {
-  reader__next_chunk(obj@pointer)
+setMethod("next_chunk", "chunker", function(obj) {
+  chunker__next_chunk(obj@pointer)
 })
 
 
-#' get_matrix
-#' @name get_matrix
-#' @rdname reader-methods
+#' get_table
+#' @name get_table
 #' @description NULL
+#' @rdname chunker-methods
 #' @export
+setGeneric("get_table", function(obj) standardGeneric("get_table"))
 
-setGeneric("get_matrix", function(obj) standardGeneric("get_matrix"))
 
+#' @aliases get_dataframe, chunker-methods
+#' @rdname chunker-methods
 
-#' @rdname reader-methods
-#' @aliases get_matrix,reader-methods
-
-setMethod("get_matrix", "reader", function(obj) {
-  reader__get_matrix(obj@pointer)
+setMethod("get_table", "chunker", function(obj) {
+  what_is <- get_type(obj) 
+  if(what_is == "data.frame") {
+    chunker__get_dataframe(obj@pointer)
+  } else {
+    chunker__get_matrix(obj@pointer)
+  }
 })
 
-#' get_dataframe
-#' @name get_dataframe
-#' @description NULL
-#' @rdname reader-methods
-#' @export
-
-setGeneric("get_dataframe", function(obj) standardGeneric("get_dataframe"))
-
-
-#' @aliases get_dataframe, reader-methods
-#' @rdname reader-methods
-
-setMethod("get_dataframe", "reader", function(obj) {
-  reader__get_dataframe(obj@pointer)
-})
-
-#' get_completed
-#' @name get_completed
-#' @description NULL
-#' @rdname reader-methods
-#' @export
-
-setGeneric("get_completed", function(obj) standardGeneric("get_completed"))
-
-
-#' @aliases get_completed,reader-methods
-#' @rdname reader-methods
-
-setMethod("get_completed", "reader", function(obj) {
-  reader__get_completed(obj@pointer)
-})
 
 #' get_colnames
 #' @name get_colnames
-#' @rdname reader-methods
+#' @rdname chunker-methods
 #' @description NULL
 #' @export
 
 setGeneric("get_colnames", function(obj) standardGeneric("get_colnames"))
 
 
-#' @aliases get_colnames,reader-method
-#' @rdname reader-methods
+#' @aliases get_colnames,chunker-method
+#' @rdname chunker-methods
 
-setMethod("get_colnames", "reader", function(obj) {
-  reader__get_colnames(obj@pointer)
+setMethod("get_colnames", "chunker", function(obj) {
+  chunker__get_colnames(obj@pointer)
 })
 
+
+#' get_completed
+#' @name get_completed
+#' @description NULL
+#' @rdname chunker-methods
+#' @export
+
+setGeneric("get_completed", function(obj) standardGeneric("get_completed"))
+
+
+#' @aliases get_completed,chunker-methods
+#' @rdname chunker-methods
+
+setMethod("get_completed", "chunker", function(obj) {
+  chunker__get_completed(obj@pointer)
+})
+
+
+#' get_type
+#' @name get_type
+#' @description NULL
+#' @rdname chunker-methods
+#' @export
+
+setGeneric("get_type", function(obj) standardGeneric("get_type"))
+
+
+#' @aliases get_type,chunker-methods
+#' @rdname chunker-methods
+
+setMethod("get_type", "chunker", function(obj) {
+  chunker__get_type(obj@pointer)
+})
+
+
 #-------------
-# Add documentation to matrix2df
+# Add documentation for matrix2df
 
 #' matrix2df
-#' @description conversion from matrix to DataFrame
-#' @param x matrix
+#' @description conversion from matrix to data frame
+#' @param x A matrix
 #' @export
 NULL
-
-
-# #' reader_method
-# #' @description Method constructor
-# #' @param name Name of the method
-# #' @keywords internal
-# 
-# reader_method <- function (name) { 
-#   paste ("_chunkR_reader", name, sep = "__")
-# }
-# 
-# #' $
-# #' @description Method accessor
-# #' @param x reader object
-# #' @param name Name of the method
-# #' @aliases $,reader-method
-# #' @exportMethod 
-# 
-# # syntactic sugar to allow object$method( ... )
-# setMethod("$", "reader", function (x, name) {
-#   function (...) .Call (reader_method(name) ,x@pointer, ...)
-# } )

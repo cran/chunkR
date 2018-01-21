@@ -1,5 +1,5 @@
-#ifndef READER_H_
-#define READER_H_
+#ifndef chunker_H_
+#define chunker_H_
 
 #include <Rcpp.h>
 #include <iostream>
@@ -8,20 +8,37 @@ using namespace Rcpp;
 
 namespace _chunkR {
 
-class reader {
+class chunker {
 
 public:
-	reader(const std::string path, char sep, bool has_colnames, bool has_rownames,
+  // constructors & destructor-----
+  // matrix constructor
+  chunker(const std::string path, char sep, bool has_colnames, bool has_rownames,
+         size_t chunksize, StringVector column_types);
+  // data.frame constructor
+	chunker(const std::string path, char sep, bool has_colnames, bool has_rownames,
 			size_t chunksize);
-	virtual ~reader();
-	void set_colnames();
+	virtual ~chunker();
+	
+	// next chunk ------------------
 	bool next_chunk();
-	StringVector get_colnames();
-	StringMatrix get_matrix();
-	size_t get_completed();
-	DataFrame get_dataframe();
+	bool next_chunk_matrix();
+	bool next_chunk_df();
+	
+  // setters ---------------------
+	void set_colnames();
 	std::vector<std::string> set_generic_rownames(std::string what, size_t start_from, size_t n_row);
 	std::vector<std::string> set_generic_colnames(std::string what, size_t start_from, size_t n_col);
+	
+	// getters --------------------
+	StringMatrix get_matrix();
+	DataFrame get_dataframe();
+	StringVector get_colnames();
+	size_t get_completed();
+	const std::string get_type();	
+	
+	// auxiliary ------------------
+	inline List mixed_list(std::vector<int> x,  int howmuch);
 
 private:
 	const std::string path;
@@ -29,23 +46,30 @@ private:
 	bool has_colnames;
 	const bool has_rownames;
 	const size_t chunksize;
+	const std::string output_format;
+	std::vector<int> col_types;
 
 	size_t n_row;
 	size_t n_col;
 	std::vector<std::string> rnames;
 	std::vector<std::string> cnames;
-
-	std::ifstream ifs;
+	size_t n_lines;
+	
+	std::ifstream line_container;
 	size_t pointer_position;
 
 	std::string* line;
 	std::string* element;
 	size_t lines_completed;
-	std::vector<std::string> temp;
-	StringMatrix data_chunk;
+	std::vector<std::string> word;
+  
+	struct chunkInfo {
+	  StringMatrix m;
+	  DataFrame df;
+	} data_chunk;
 
 };
 
-} /* namespace _reader */
+} /* namespace _chunker */
 
-#endif /* READER_H_ */
+#endif /* chunker_H_ */
