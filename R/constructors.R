@@ -2,22 +2,22 @@
 #' chunker
 #' @param path Input file path 
 #' @param sep Character separating cells in the input table (default = " ")
+#' @param quoted Quoted character data? Default FALSE. If TRUE, the program removes quotes.
 #' @param has_colnames Column names present in the input table? (Logical, default TRUE)
 #' @param has_rownames Row names present in the input table? (Logical, default TRUE)
 #' @param chunksize Chunk size (default 1000)
 #' @param data_format Format of input data: "data.frame" (default) or "matrix".
-#' @param columns_classes Vector with columns classes: "character", "numeric" (aka "double"), 
+#' @param columns_classes Vector with the class of each column: "character", "numeric" (aka "double"), 
 #' "integer" or "logical".
 #' @param autodetect Use auto-detection of columns classes? Default TRUE.
-#' @param scan_rows How many rows to scan for auto-detection of columns classes. Default 10. Note
-#' that this value shoud be increased when columns present all NA values in the first scan_rows ranger of rows.
-#' Checking is perfomed via a call to read.table with the scan_rows value passed to the nrows parameter,
-#' and the posterior extraction of the corresponding classes detected in this call. 
-#' 
+#' @param scan_rows How many rows to scan for auto-detection of columns classes. 
+#' Default is 10. Note that this value shoud be increased when columns only have NA values 
+#' in the scanned rows. Columns classes are detected via a call to read.table 
+#' with the scan_rows value passed to the nrows parameter.
 #' @description The objects of class "chunker" are the central elements of the
 #' chunkR package. These objects can store a data chunk and other 
 #' information required for the process of reading a file in pieces.
-#' A chunker object is created with the chunker() function, 
+#' A "chunker" object is created with the chunker() function, 
 #' that requires the path to a file, and other arguments, as the size of the chunk 
 #' and the data type ("data.frame" or "matrix").
 #' Two basic methods are defined to manipulate the object: 
@@ -66,7 +66,7 @@
 #' 
 #' write.table(iris, tmp_path_csv, quote = FALSE, sep = ",")
 #' 
-#' # read the csv indicating the value of the sep parameter
+#' # read the csv indicating the value of the 'sep' parameter
 #' my_chunker_object2 <- chunker(tmp_path_csv, chunksize = 30, sep = ",")
 #' # the file can  then be processed as with tab delimiters
 #' 
@@ -178,12 +178,11 @@
 #' 
 #' @export
 
-setGeneric("chunker", function(path, sep = " ", has_colnames = TRUE,
-                              has_rownames = TRUE, chunksize = 1000L,
-                              data_format = c("data.frame", "matrix"),
-                              columns_classes = character(0),
-                              autodetect = TRUE,
-                              scan_rows = 10) {
+setGeneric("chunker", function(path, sep = " ", quoted = FALSE,
+                               has_colnames = TRUE, has_rownames = TRUE, 
+                               chunksize = 1000L, data_format = c("data.frame", "matrix"),
+                               columns_classes = character(0), autodetect = TRUE,
+                               scan_rows = 10) {
   
   data_format <- match.arg(data_format)
   
@@ -198,14 +197,26 @@ setGeneric("chunker", function(path, sep = " ", has_colnames = TRUE,
     }
   }
   
-  
   if(autodetect) {
-    x <- read.table(path, nrows = scan_rows, header = has_colnames, 
-                    row.names = ifelse(has_rownames, 1, NULL), 
-                    stringsAsFactors = FALSE, sep = sep)
+    
+      if(!has_rownames) {
+        x <- read.table(path, nrows = scan_rows, header = has_colnames, 
+                        row.names = NULL, stringsAsFactors = FALSE, sep = sep)
+      } else {
+        x <- read.table(path, nrows = scan_rows, header = has_colnames, 
+                        stringsAsFactors = FALSE, sep = sep) 
+      }
+      # special case with another custom newline
+ 
     x <- lapply(as.list(x), typeof)
     columns_classes <- unname(unlist(x))
   }
-  new("chunker", path, sep, has_colnames, has_rownames, chunksize, 
-      data_format, columns_classes)
+
+  out <- new("chunker", path, sep, quoted, has_colnames, 
+      has_rownames, chunksize, data_format, columns_classes)
+  out@attr <- list(path = path, sep = sep, quoted = quoted,
+                   has_colnames = has_colnames, has_rownames  = has_rownames,
+                   chunksize = chunksize, data_format = data_format,
+                   columns_classes = columns_classes, call = match.call())
+ out
 })

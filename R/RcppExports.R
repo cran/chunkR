@@ -64,6 +64,10 @@ NULL
 #' @keywords internal
 NULL
 
+#' chunker__get_completed
+#' @keywords internal
+NULL
+
 #' chunker__get_type
 #' @keywords internal
 NULL
@@ -72,12 +76,12 @@ NULL
 #' @keywords internal
 NULL
 
-chunker__new_data_frame <- function(path_, sep_, has_colnames_, has_rownames_, chunksize_, column_types_) {
-    .Call(`_chunkR_chunker__new_data_frame`, path_, sep_, has_colnames_, has_rownames_, chunksize_, column_types_)
+chunker__new_data_frame <- function(path_, sep_, quoted_, has_colnames_, has_rownames_, chunksize_, column_types_) {
+    .Call(`_chunkR_chunker__new_data_frame`, path_, sep_, quoted_, has_colnames_, has_rownames_, chunksize_, column_types_)
 }
 
-chunker__new_matrix <- function(path_, sep_, has_colnames_, has_rownames_, chunksize_) {
-    .Call(`_chunkR_chunker__new_matrix`, path_, sep_, has_colnames_, has_rownames_, chunksize_)
+chunker__new_matrix <- function(path_, sep_, quoted_, has_colnames_, has_rownames_, chunksize_) {
+    .Call(`_chunkR_chunker__new_matrix`, path_, sep_, quoted_, has_colnames_, has_rownames_, chunksize_)
 }
 
 chunker__next_chunk <- function(ptr) {
@@ -98,6 +102,10 @@ chunker__get_dataframe <- function(ptr) {
 
 chunker__get_colnames <- function(ptr) {
     .Call(`_chunkR_chunker__get_colnames`, ptr)
+}
+
+chunker__get_total <- function(ptr) {
+    .Call(`_chunkR_chunker__get_total`, ptr)
 }
 
 chunker__get_completed <- function(ptr) {

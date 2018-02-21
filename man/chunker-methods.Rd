@@ -15,9 +15,15 @@
 \alias{get_completed}
 \alias{get_completed,chunker-method}
 \alias{get_completed,chunker-methods}
+\alias{get_total}
+\alias{get_total,chunker-method}
+\alias{get_total,chunker-methods}
 \alias{get_type}
 \alias{get_type,chunker-method}
 \alias{get_type,chunker-methods}
+\alias{get_attr}
+\alias{get_attr,chunker-method}
+\alias{get_attr,chunker-methods}
 \title{Manipulation methods for chunker objects}
 \usage{
 next_chunk(obj)
@@ -36,9 +42,17 @@ get_completed(obj)
 
 \S4method{get_completed}{chunker}(obj)
 
+get_total(obj)
+
+\S4method{get_total}{chunker}(obj)
+
 get_type(obj)
 
 \S4method{get_type}{chunker}(obj)
+
+get_attr(obj)
+
+\S4method{get_attr}{chunker}(obj)
 }
 \arguments{
 \item{obj}{object of class chunker}
@@ -50,7 +64,7 @@ chunker objects can be manipulated with the following methods:
 \item{\bold{get_table}}{: retrieve the current data chunk contained in the object}
 }
 
-In addition, this information can be retrieved from chunker objects:
+In addition, the following information can be retrieved from chunker objects:
 \enumerate{
 \item{\bold{get_completed}}{: get the number of rows already read}
 \item{\bold{get_colnames}}{: get column names of the chunker object}
